@@ -1,0 +1,1873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Borse Techos — Tour Board</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root{
+    --bg:#14161A;
+    --surface:#1C1F24;
+    --surface-alt:#23272D;
+    --line:#33383F;
+    --steel:#5B6773;
+    --aluminum:#C4CCD4;
+    --amber:#E2A63B;
+    --text:#ECEAE3;
+    --text-muted:#8B929B;
+    --danger:#C1573F;
+    --good:#5FA37A;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 14px),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    padding:32px 28px 60px;
+    min-height:100vh;
+  }
+  .wrap{max-width:1180px; margin:0 auto;}
+
+  header{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    border-bottom:1px solid var(--line);
+    padding-bottom:18px; margin-bottom:22px;
+    gap:20px; flex-wrap:wrap;
+  }
+  .brand-eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; letter-spacing:0.14em; color:var(--amber);
+    text-transform:uppercase; margin-bottom:6px;
+  }
+  h1{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:30px; letter-spacing:-0.01em;}
+  .subtitle{color:var(--text-muted); font-size:13px; margin-top:4px;}
+  .add-btn{
+    background:var(--amber); color:#1A1300; border:none;
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px;
+    padding:11px 20px; border-radius:2px; cursor:pointer;
+    transition:transform 0.12s ease, background 0.12s ease;
+  }
+  .add-btn:hover{background:#EEB458; transform:translateY(-1px);}
+
+  .summary{
+    display:grid; grid-template-columns:repeat(5,1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line);
+    margin-bottom:28px;
+  }
+  @media (max-width:880px){ .summary{grid-template-columns:repeat(2,1fr);} }
+  .stat{background:var(--surface); padding:16px 18px;}
+  .stat-label{
+    font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.1em;
+    color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;
+  }
+  .stat-value{
+    font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700;
+    display:flex; align-items:baseline; gap:6px;
+  }
+  .stat-unit{font-size:13px; color:var(--steel); font-weight:500;}
+
+  .board{display:grid; grid-template-columns:1fr 400px; gap:24px;}
+  @media (max-width:880px){ .board{grid-template-columns:1fr;} }
+
+  .panel-title{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.12em;
+    color:var(--steel); text-transform:uppercase; margin-bottom:12px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .panel-title::after{content:''; flex:1; height:1px; background:var(--line);}
+
+  .timeline{display:flex; flex-direction:column; gap:10px;}
+  .show-card{
+    background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--steel);
+    padding:14px 16px; cursor:pointer; transition:border-color 0.12s ease, background 0.12s ease;
+    position:relative;
+  }
+  .show-card:hover{background:var(--surface-alt);}
+  .show-card.selected{border-left-color:var(--amber); background:var(--surface-alt);}
+  .show-card.past{opacity:0.4;}
+  .show-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .show-dates-row{display:flex; gap:16px; flex-wrap:wrap;}
+  .show-date-block{display:flex; flex-direction:column;}
+  .show-date-label{font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;}
+  .show-date-value{font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--aluminum); margin-top:2px; white-space:nowrap;}
+  .show-date-value.primary{color:var(--amber); font-weight:600;}
+  .show-date-value.unset{color:var(--text-muted); font-weight:400;}
+  .show-days-out{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-muted); margin-top:2px;}
+  .show-name{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:16px; margin-top:4px;}
+  .show-venue{color:var(--text-muted); font-size:12.5px; margin-top:2px;}
+  .show-tags{display:flex; gap:6px; margin-top:9px; flex-wrap:wrap;}
+  .tag{font-family:'JetBrains Mono',monospace; font-size:10px; padding:3px 7px; border:1px solid var(--line); color:var(--aluminum);}
+  .truck-icon{vertical-align:-1px; margin-right:4px; flex-shrink:0;}
+  .tag.warn{border-color:var(--danger); color:var(--danger);}
+  .card-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
+  .card-action-btn{
+    background:none; border:1px solid var(--line); color:var(--text-muted); cursor:pointer;
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12.5px; padding:8px 16px; border-radius:4px;
+  }
+  .card-action-btn:hover{color:var(--text); border-color:var(--steel);}
+  .card-action-btn.danger:hover{color:var(--danger); border-color:var(--danger);}
+  .empty{color:var(--text-muted); font-size:13px; padding:30px 16px; text-align:center; border:1px dashed var(--line);}
+
+  .detail{background:var(--surface); border:1px solid var(--line); padding:20px; position:sticky; top:24px;}
+  .detail-empty{color:var(--text-muted); font-size:13px; line-height:1.6;}
+  .detail-name{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px; margin-bottom:2px;}
+  .detail-venue{color:var(--text-muted); font-size:13px; margin-bottom:18px;}
+
+  .rail{margin:16px 0 34px; overflow:visible;}
+  .rail-track{position:relative; height:2px; background:var(--line); margin:26px 10px 8px;}
+  .rail-point{
+    position:absolute; top:-4px; width:10px; height:10px; border:2px solid var(--bg);
+    background:var(--amber); border-radius:50%; transform:translateX(-50%);
+  }
+  .rail-point.muted{background:var(--steel);}
+  .rail-label{
+    position:absolute; top:-26px;
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--aluminum); white-space:nowrap;
+  }
+  .rail-label.align-start{left:0; transform:none;}
+  .rail-label.align-end{right:0; left:auto !important; transform:none;}
+  .rail-label.align-center{transform:translateX(-50%);}
+  .rail-sub{
+    position:absolute; top:14px;
+    font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text-muted); white-space:nowrap;
+  }
+  .rail-sub.align-start{left:0; transform:none;}
+  .rail-sub.align-end{right:0; left:auto !important; transform:none;}
+  .rail-sub.align-center{transform:translateX(-50%);}
+
+  .metric-grid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:18px;}
+  .metric{background:var(--surface-alt); padding:12px 14px;}
+  .metric-label{font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:0.08em; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px;}
+  .metric-value{font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700;}
+  .metric-value.alert{color:var(--danger);}
+  .metric-value.ok{color:var(--good);}
+  .metric-value.dim{color:var(--text-muted); font-size:14px;}
+
+  .notes-block{font-size:12.5px; color:var(--aluminum); line-height:1.55; white-space:pre-wrap; margin-bottom:12px;}
+  .spec-footer{margin-top:18px; padding-top:14px; border-top:1px solid var(--line); font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-muted); line-height:1.7;}
+
+  .overlay{position:fixed; inset:0; background:rgba(10,11,13,0.72); display:none; align-items:center; justify-content:center; z-index:50; padding:20px;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--surface); border:1px solid var(--line); width:100%; max-width:460px; padding:24px; max-height:88vh; overflow-y:auto;}
+  .modal h2{font-family:'Space Grotesk',sans-serif; font-size:18px; margin-bottom:16px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.06em; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px;}
+  .field .hint{color:var(--steel); text-transform:none; letter-spacing:0; font-size:10.5px;}
+  .field input, .field select, .field textarea{
+    width:100%; background:var(--bg); border:1px solid var(--line); color:var(--text);
+    padding:9px 10px; font-family:'Inter',sans-serif; font-size:13.5px; border-radius:2px;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none; border-color:var(--amber);}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .field-row.three{grid-template-columns:1fr 1fr 1fr;}
+  .truck-row{display:flex; gap:8px; align-items:center; margin-bottom:8px;}
+  .truck-row select{flex:1; background:var(--bg); border:1px solid var(--line); color:var(--text); padding:9px 10px; font-family:'Inter',sans-serif; font-size:13.5px; border-radius:2px;}
+  .truck-row input{flex:0 0 70px; background:var(--bg); border:1px solid var(--line); color:var(--text); padding:9px 10px; font-family:'Inter',sans-serif; font-size:13.5px; border-radius:2px;}
+  .truck-row-remove{
+    flex:0 0 auto; background:none; border:1px solid var(--line); color:var(--text-muted); cursor:pointer;
+    width:34px; height:34px; border-radius:2px; font-size:14px;
+  }
+  .truck-row-remove:hover{color:var(--danger); border-color:var(--danger);}
+  .field textarea{resize:vertical; min-height:56px;}
+  .modal-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:20px;}
+  .btn-ghost{background:none; border:1px solid var(--line); color:var(--text-muted); padding:9px 16px; font-family:'Space Grotesk',sans-serif; font-size:13px; cursor:pointer; border-radius:2px;}
+  .btn-ghost:hover{color:var(--text); border-color:var(--steel);}
+  .btn-solid{background:var(--amber); border:none; color:#1A1300; padding:9px 18px; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px; cursor:pointer; border-radius:2px;}
+  .btn-solid:hover{background:#EEB458;}
+  .loading{color:var(--text-muted); font-size:13px; padding:20px; text-align:center;}
+
+  .tabs{display:flex; gap:2px; margin-bottom:20px; border-bottom:1px solid var(--line);}
+  .tab-btn{
+    background:none; border:none; color:var(--text-muted); cursor:pointer;
+    font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:600;
+    padding:10px 4px; margin-right:22px; border-bottom:2px solid transparent;
+  }
+  .tab-btn.active{color:var(--text); border-bottom-color:var(--amber);}
+  .tab-btn:hover{color:var(--text);}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .gantt-wrap{background:var(--surface); border:1px solid var(--line); overflow:hidden;}
+  .gantt-scroll{overflow-x:auto;}
+  .gantt-header-row{display:flex; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--surface); z-index:3;}
+  .gantt-label-spacer{
+    position:sticky; left:0; z-index:4; flex:0 0 210px; background:var(--surface);
+    border-right:1px solid var(--line); padding:12px 14px;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:12px; letter-spacing:0.03em;
+    color:var(--aluminum); text-transform:uppercase;
+  }
+  .gantt-ticks{position:relative; height:38px;}
+  .gantt-tick{
+    position:absolute; top:0; height:100%; display:flex; align-items:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:11.5px; color:var(--aluminum);
+    border-left:1px solid var(--line); padding-left:6px; white-space:nowrap;
+  }
+  .gantt-row{display:flex; align-items:stretch; border-bottom:1px solid var(--line); min-height:58px;}
+  .gantt-row:nth-child(even){background:rgba(255,255,255,0.015);}
+  .gantt-row:hover{background:var(--surface-alt);}
+  .gantt-label{
+    position:sticky; left:0; z-index:2; flex:0 0 210px; background:var(--surface);
+    border-right:1px solid var(--line); padding:10px 14px; display:flex; flex-direction:column; justify-content:center;
+    cursor:pointer;
+  }
+  .gantt-row:nth-child(even) .gantt-label{background:var(--surface);}
+  .gantt-row:hover .gantt-label{background:var(--surface-alt);}
+  .gantt-label-name{font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700; line-height:1.3;}
+  .gantt-label-city{font-family:'Inter',sans-serif; font-size:11.5px; color:var(--text-muted); margin-top:3px;}
+  .gantt-track{position:relative; flex:1 0 auto;}
+  .gantt-today{position:absolute; top:0; bottom:0; width:0; border-left:2px dashed var(--amber); z-index:1; opacity:0.85;}
+  .gantt-bar{
+    position:absolute; top:16px; height:26px; border-radius:3px;
+    background:var(--steel); border:2px solid var(--line); cursor:pointer;
+    display:flex; align-items:center; box-shadow:0 1px 2px rgba(0,0,0,0.2);
+  }
+  .gantt-bar.tight{border-color:var(--amber);}
+  .gantt-bar.overlap{border-color:var(--danger);}
+  .gantt-bar.open-end{background:linear-gradient(90deg, var(--steel), transparent);}
+  .gantt-show-marker{
+    position:absolute; top:-5px; width:8px; height:8px; border-radius:50%;
+    background:var(--amber); border:2px solid var(--bg); transform:translateX(-50%);
+  }
+  .gantt-leg-num{
+    position:absolute; top:-9px; left:-6px; width:17px; height:17px; border-radius:50%;
+    background:var(--bg); border:2px solid var(--steel); color:var(--aluminum);
+    font-family:'JetBrains Mono',monospace; font-size:9px; display:flex; align-items:center; justify-content:center;
+  }
+  .gantt-connector{position:absolute; top:27px; height:5px; border-radius:2px; z-index:1;}
+  .gantt-section-label{
+    padding:12px 20px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; letter-spacing:0.05em;
+    text-transform:uppercase; color:var(--aluminum); background:var(--surface-alt); border-bottom:1px solid var(--line);
+  }
+  .gantt-mode-toggle{display:flex; gap:2px; margin-bottom:12px;}
+  .mode-btn{
+    background:var(--surface); border:1px solid var(--line); color:var(--text-muted); cursor:pointer;
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px; padding:9px 16px;
+  }
+  .mode-btn:first-child{border-radius:4px 0 0 4px;}
+  .mode-btn:last-child{border-radius:0 4px 4px 0;}
+  .mode-btn.active{background:var(--amber); color:#1A1300; border-color:var(--amber);}
+  .gantt-legend{display:flex; flex-wrap:wrap; gap:18px; padding:16px 18px; border-top:1px solid var(--line); background:var(--surface);}
+  .legend-item{display:flex; align-items:center; gap:7px; font-family:'Inter',sans-serif; font-size:12px; color:var(--aluminum);}
+  .legend-swatch{width:16px; height:11px; border-radius:2px; flex-shrink:0;}
+  .legend-dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+
+  .route-card{background:var(--surface); border:1px solid var(--line); margin-bottom:20px;}
+  .route-head{display:flex; justify-content:space-between; align-items:center; padding:18px 20px; border-bottom:1px solid var(--line); flex-wrap:wrap; gap:10px;}
+  .route-name-input{
+    background:none; border:none; color:var(--text); font-family:'Space Grotesk',sans-serif;
+    font-weight:700; font-size:19px; padding:4px 6px; border-radius:4px; min-width:120px;
+  }
+  .route-name-input:focus{outline:none; background:var(--surface-alt);}
+  .route-head-actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .route-totals{font-family:'Space Grotesk',sans-serif; font-size:13.5px; color:var(--aluminum); font-weight:600;}
+
+  .leg{padding:18px 20px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:14px;}
+  .leg:last-of-type{border-bottom:none;}
+  .leg-route{display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+  .leg-node{flex:1 1 160px; min-width:140px;}
+  .leg-node-label{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;}
+  .leg-node-name{font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:700; line-height:1.25;}
+  .leg-node-date{font-size:13px; color:var(--aluminum); margin-top:3px;}
+  .leg-arrow{flex:0 0 auto; color:var(--steel); font-size:22px; padding-top:14px;}
+
+  .leg-info-row{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .leg-dist{
+    font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:600; color:var(--text);
+    padding:9px 14px; background:var(--surface-alt); border-radius:4px;
+  }
+  .leg-dist.unset{color:var(--text-muted); font-weight:500; font-style:normal;}
+  .leg-calc-btn{
+    background:none; border:1px solid var(--line); color:var(--text-muted); cursor:pointer;
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px; padding:9px 16px; border-radius:4px;
+  }
+  .leg-calc-btn:hover{color:var(--text); border-color:var(--steel);}
+
+  .leg-status-banner{
+    font-family:'Space Grotesk',sans-serif; font-size:13.5px; font-weight:600;
+    padding:9px 14px; border-radius:4px; display:inline-block;
+  }
+  .leg-status-banner.ok{background:rgba(95,163,122,0.15); color:var(--good);}
+  .leg-status-banner.tight{background:rgba(226,166,59,0.15); color:var(--amber);}
+  .leg-status-banner.bad{background:rgba(193,87,63,0.15); color:var(--danger);}
+
+  .leg-actions-row{display:flex; justify-content:flex-end; gap:8px;}
+  .leg-actions-row .leg-calc-btn{padding:8px 12px; font-size:14px;}
+  .leg-remove-btn{
+    background:none; border:1px solid var(--line); color:var(--text-muted); cursor:pointer;
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px; padding:8px 14px; border-radius:4px;
+  }
+  .leg-remove-btn:hover{color:var(--danger); border-color:var(--danger);}
+
+  .route-add-row{display:flex; gap:10px; padding:16px 20px; align-items:center; flex-wrap:wrap;}
+  .route-add-row select{
+    flex:1; min-width:200px; background:var(--bg); border:1px solid var(--line); color:var(--text);
+    padding:11px 12px; font-family:'Inter',sans-serif; font-size:14px; border-radius:4px;
+  }
+  .unrouted-box{background:var(--surface); border:1px dashed var(--line); padding:16px 18px; margin-top:8px;}
+  .unrouted-box .panel-title{margin-bottom:10px;}
+  .unrouted-chip{display:inline-block; font-family:'Inter',sans-serif; font-size:13px; color:var(--aluminum); border:1px solid var(--line); padding:6px 12px; border-radius:14px; margin:0 8px 8px 0;}
+
+  .route-badge{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:11.5px; padding:6px 12px; border-radius:14px; letter-spacing:0.02em;}
+  .route-badge.published{background:rgba(95,163,122,0.18); color:var(--good);}
+
+  @media (max-width:600px){
+    .leg-route{flex-direction:column; align-items:flex-start; gap:8px;}
+    .leg-arrow{padding-top:0; transform:rotate(90deg);}
+  }
+
+  .compare-wrap{overflow-x:auto; background:var(--surface); border:1px solid var(--line);}
+  .compare-table{border-collapse:collapse; width:100%; min-width:480px;}
+  .compare-table th, .compare-table td{
+    padding:10px 14px; text-align:left; border-bottom:1px solid var(--line); border-right:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace; font-size:12px; white-space:nowrap;
+  }
+  .compare-table th:last-child, .compare-table td:last-child{border-right:none;}
+  .compare-table thead th{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px; background:var(--surface-alt);
+  }
+  .compare-table tbody th{
+    color:var(--text-muted); font-weight:400; text-transform:uppercase; font-size:10px; letter-spacing:0.05em; background:var(--surface-alt);
+  }
+  .compare-table td.warn-cell{color:var(--amber);}
+  .compare-table td.bad-cell{color:var(--danger);}
+
+  /* Next Up — big, simple, field-friendly */
+  .hero{
+    background:var(--surface); border:1px solid var(--line); border-left:6px solid var(--steel);
+    padding:28px 26px; margin-bottom:20px;
+  }
+  .hero.status-green{border-left-color:var(--good);}
+  .hero.status-amber{border-left-color:var(--amber);}
+  .hero.status-red{border-left-color:var(--danger);}
+  .hero-eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--text-muted); margin-bottom:10px;
+  }
+  .hero-title{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:30px; line-height:1.2; margin-bottom:6px;}
+  .hero-sub{font-size:16px; color:var(--aluminum); margin-bottom:16px;}
+  .hero-when{
+    display:inline-block; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px;
+    padding:8px 16px; border-radius:4px; margin-top:4px;
+  }
+  .hero-when.status-green{background:rgba(95,163,122,0.15); color:var(--good);}
+  .hero-when.status-amber{background:rgba(226,166,59,0.15); color:var(--amber);}
+  .hero-when.status-red{background:rgba(193,87,63,0.15); color:var(--danger);}
+  .hero-facts{display:flex; flex-wrap:wrap; gap:24px; margin-top:20px; padding-top:18px; border-top:1px solid var(--line);}
+  .hero-fact-label{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;}
+  .hero-fact-value{font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600;}
+
+  .next-section-title{font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:700; margin:24px 0 12px;}
+  .next-row{
+    display:flex; align-items:center; gap:16px; background:var(--surface); border:1px solid var(--line);
+    padding:16px 18px; margin-bottom:10px; cursor:pointer;
+  }
+  .next-row:hover{border-color:var(--steel);}
+  .next-row-dates{display:flex; gap:8px; flex:0 0 auto;}
+  .next-row-date{
+    flex:0 0 64px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px; text-align:center;
+    padding:6px 4px; border-radius:4px; background:var(--surface-alt);
+  }
+  .next-row-date.unset{opacity:0.4;}
+  .next-row-date-label{
+    font-family:'JetBrains Mono',monospace; font-size:8.5px; color:var(--text-muted); text-transform:uppercase;
+    letter-spacing:0.04em; display:block; margin-bottom:2px; font-weight:400;
+  }
+  .next-row-date .day-num{font-size:18px; display:block;}
+  .next-row-body{flex:1; min-width:0;}
+  .next-row-name{font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600;}
+  .next-row-city{font-size:13.5px; color:var(--text-muted); margin-top:2px;}
+  .next-pill{
+    flex:0 0 auto; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600;
+    padding:7px 14px; border-radius:14px; white-space:nowrap;
+  }
+  .next-pill.status-green{background:rgba(95,163,122,0.15); color:var(--good);}
+  .next-pill.status-amber{background:rgba(226,166,59,0.15); color:var(--amber);}
+  .next-pill.status-red{background:rgba(193,87,63,0.15); color:var(--danger);}
+  .next-empty{background:var(--surface); border:1px dashed var(--line); padding:36px 20px; text-align:center; color:var(--text-muted); font-size:15px;}
+  @media (max-width:600px){
+    .hero-title{font-size:24px;}
+    .next-row{flex-wrap:wrap;}
+    .next-row-date{flex:0 0 56px;}
+  }
+</style>
+<!-- Firebase (provides the saved-data backend, since GitHub Pages itself only serves static files) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="brand-eyebrow">Borse Techos // Deployment Board</div>
+      <h1>Tour &amp; Logistics Tracker</h1>
+      <div class="subtitle">Load-in, show, and load-out for every confirmed date.</div>
+    </div>
+    <button class="add-btn" onclick="openModal()">+ Add show</button>
+  </header>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tabNextBtn" onclick="switchTab('next')">Next Up</button>
+    <button class="tab-btn" id="tabBoardBtn" onclick="switchTab('board')">Board</button>
+    <button class="tab-btn" id="tabGanttBtn" onclick="switchTab('gantt')">Timeline — all shows</button>
+    <button class="tab-btn" id="tabRoutesBtn" onclick="switchTab('routes')">Routes</button>
+  </div>
+
+  <div class="view active" id="nextView">
+    <div id="nextContent"></div>
+  </div>
+
+  <div class="view" id="boardView">
+    <div class="board">
+      <div>
+        <div class="panel-title">Board — sorted by load-in</div>
+        <div class="timeline" id="timeline"><div class="loading">Loading board…</div></div>
+      </div>
+      <div>
+        <div class="panel-title">Logistics detail</div>
+        <div class="detail" id="detail">
+          <div class="detail-empty">Select a show from the board to see its load-in → show → load-out timeline.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="ganttView">
+    <div class="panel-title">Everything at once — load-in through load-out, by day</div>
+    <div class="gantt-mode-toggle">
+      <button class="mode-btn active" id="ganttModeShowsBtn" onclick="setGanttMode('shows')">All shows</button>
+      <button class="mode-btn" id="ganttModeRoutesBtn" onclick="setGanttMode('routes')">By route</button>
+    </div>
+    <div class="gantt-wrap">
+      <div class="gantt-scroll" id="ganttScroll">
+        <div id="ganttContent"></div>
+      </div>
+      <div class="gantt-legend">
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--steel); border:2px solid var(--line);"></div> On site (load-in → load-out)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--amber);"></div> Show date</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--steel); border:2px solid var(--amber);"></div> Tight on drive time</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--steel); border:2px solid var(--danger);"></div> Overlaps another show's window</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:linear-gradient(90deg, var(--steel), transparent); border:2px solid var(--line);"></div> Load-out not set</div>
+        <div class="legend-item"><div style="width:0; height:12px; border-left:1px dashed var(--amber);"></div> Today</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--good);"></div> Route leg — enough time to travel</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--amber);"></div> Route leg — tight</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--danger);"></div> Route leg — not enough time</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="routesView">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <div class="panel-title" style="margin-bottom:0; flex:1;">Routes — chain gear from show to show</div>
+      <button class="add-btn" onclick="createRoute()">+ New route</button>
+    </div>
+    <div id="routesList"></div>
+    <div class="unrouted-box" id="unroutedBox"></div>
+
+    <div style="margin-top:28px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div class="panel-title" style="margin-bottom:0; flex:1;">Published — compare across routes</div>
+        <button class="btn-ghost" style="padding:6px 12px; font-size:12px;" onclick="refreshPublished()">Refresh</button>
+      </div>
+      <div id="publishedCompare"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="modalTitle">Add show</h2>
+    <div class="field">
+      <label>Event / artist</label>
+      <input id="f_name" placeholder="e.g. Tecate Comuna">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>City</label>
+        <input id="f_city" placeholder="Puebla" onblur="if(!document.getElementById('f_distance').value) calculateDistance();">
+      </div>
+      <div class="field">
+        <label>Venue</label>
+        <input id="f_venue" placeholder="Foro Cholula">
+      </div>
+    </div>
+    <div class="field-row three">
+      <div class="field">
+        <label>Load-in date</label>
+        <input id="f_loadin" type="date">
+      </div>
+      <div class="field">
+        <label>Load-in time <span class="hint">optional</span></label>
+        <input id="f_loadin_time" type="time">
+      </div>
+      <div class="field">
+        <label>Show date <span class="hint">optional</span></label>
+        <input id="f_showdate" type="date">
+      </div>
+    </div>
+    <div class="field">
+      <label>Load-out</label>
+      <input id="f_loadout" type="date">
+    </div>
+    <div class="field">
+      <label>Distance from Monterrey (km) <span class="hint">auto-calculated</span></label>
+      <div style="display:flex; gap:8px;">
+        <input id="f_distance" type="number" min="0" placeholder="calculated from city" style="flex:1;">
+        <button type="button" class="btn-ghost" id="calcDistBtn" style="white-space:nowrap;" onclick="calculateDistance()">Calculate</button>
+      </div>
+      <div id="calcStatus" style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--steel); margin-top:6px;"></div>
+    </div>
+    <div class="field">
+      <label>Roof model</label>
+      <select id="f_roof">
+        <option>Borse Techos 25 x 20</option>
+        <option>Borse Techos 25 x 15</option>
+        <option>Borse Techos 22 x 15</option>
+        <option>Borse Techos 20 x 15</option>
+        <option>BTM 20 x 12</option>
+        <option>BTM 18 x 12</option>
+        <option>Unassigned</option>
+      </select>
+    </div>
+    <div class="field-row three">
+      <div class="field">
+        <label>Wing size (m) <span class="hint">per side</span></label>
+        <select id="f_wingsize">
+          <option value="">— none —</option>
+          <option value="5.14">5.14</option>
+          <option value="7.71">7.71</option>
+          <option value="10.28">10.28</option>
+          <option value="12.86">12.86</option>
+          <option value="15.43">15.43</option>
+          <option value="18.00">18.00</option>
+          <option value="20.57">20.57</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Clearance (m) <span class="hint">roof height</span></label>
+        <input id="f_clearance" type="number" min="0" step="0.1" placeholder="e.g. 12">
+      </div>
+      <div class="field">
+        <label>Working area (m²) <span class="hint">optional</span></label>
+        <input id="f_workingarea" type="number" min="0" placeholder="e.g. 600">
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:6px;">
+      <label style="font-size:12px; color:var(--steel);">Fleet for this show</label>
+    </div>
+    <div class="field">
+      <label>Trucks <span class="hint">mix sizes as needed</span></label>
+      <div id="truckRows"></div>
+      <button type="button" class="leg-calc-btn" style="margin-top:2px;" onclick="addTruckRow()">+ Add truck size</button>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>3.5 Ton trucks <span class="hint">small unit</span></label>
+        <input id="f_smalltruck35" type="number" min="0" placeholder="0">
+      </div>
+      <div class="field">
+        <label>Piolin <span class="hint">small unit</span></label>
+        <input id="f_piolin" type="number" min="0" placeholder="0">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Notes</label>
+      <textarea id="f_notes" placeholder="Client contact, permit status, missing dates…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="deleteInModal" style="display:none; color:var(--danger); border-color:var(--danger); margin-right:auto;" onclick="deleteFromModal()">Remove show</button>
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-solid" onclick="saveShow()">Save show</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================================================================
+// FIREBASE SETUP — paste your project's config here (see README.md)
+// ===================================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyBlmmG9TAC2rfIlAIks-TmOyvuT2K95zes",
+  authDomain: "borse-techos-touring.firebaseapp.com",
+  projectId: "borse-techos-touring",
+  storageBucket: "borse-techos-touring.firebasestorage.app",
+  messagingSenderId: "521337122242",
+  appId: "1:521337122242:web:0135ae652ce1bb0048ba5b"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Storage shim — same get/set shape the rest of this app already calls,
+// so nothing else in the code below needed to change. Everything is
+// synced through Firestore now: open this on your phone or laptop and
+// you'll see the same data, since there's no login separating "yours"
+// from "shared" anymore — anyone with the URL sees and can edit everything.
+window.storage = {
+  async get(key, shared){
+    const doc = await db.collection('appData').doc(key).get();
+    if(!doc.exists) return null;
+    return { key, value: doc.data().value, shared };
+  },
+  async set(key, value, shared){
+    await db.collection('appData').doc(key).set({
+      value,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { key, value, shared };
+  }
+};
+</script>
+
+<script>
+const STORAGE_KEY = 'shows';
+const ROUTES_KEY = 'routes';
+const SHARED_ROUTES_KEY = 'published_routes';
+let shows = [];
+let routes = [];
+let publishedRoutes = [];
+let selectedId = null;
+let selectedRouteId = null;
+
+const SEED = [
+  {
+    id:'seed1', name:'Festival Tecate Península', city:'Tijuana, Baja California', venue:'Explanada Estadio Caliente',
+    loadIn:'2026-10-18', showDate:'2026-10-24', loadOut:'2026-10-27',
+    warehouse:'Monterrey', distance:2380, roof:'Borse Techos 25 x 20', wingSize:'', clearance:'', workingArea:'',
+    notes:'Matched from "Festival Peninsula" — confirm this is the right event.'
+  },
+  {
+    id:'seed2', name:'Robbie Williams — Vidanta Concert Series', city:'Bahía de Banderas, Nayarit', venue:'Explanada VidantaWorld',
+    loadIn:'2026-10-21', showDate:'2026-10-27', loadOut:'2026-10-29',
+    warehouse:'Monterrey', distance:1100, roof:'Borse Techos 25 x 20', wingSize:'', clearance:'', workingArea:'',
+    notes:''
+  },
+  {
+    id:'seed3', name:'Ultra México', city:'Ciudad de México', venue:'Estadio Banorte (ex-Azteca)',
+    loadIn:'2026-10-31', showDate:'2026-11-07', loadOut:'2026-11-11',
+    warehouse:'Monterrey', distance:910, roof:'Borse Techos 25 x 20', wingSize:'', clearance:'', workingArea:'',
+    notes:'Two-day festival, Nov 7–8. Load-out calculated as three days after the final day (Nov 8).'
+  },
+  {
+    id:'seed4', name:'Romeo Santos & Prince Royce', city:'León, Guanajuato', venue:'',
+    loadIn:'2026-10-27', showDate:'2026-11-01', loadOut:'',
+    warehouse:'Monterrey', distance:690, roof:'Borse Techos 25 x 20', wingSize:'', clearance:'', workingArea:'',
+    notes:'Load-out date not yet provided — add it when confirmed. Venue name also still needed.'
+  },
+  {
+    id:'seed5', name:'Feria Yucatán (Xmatkuil)', city:'Mérida, Yucatán', venue:'Recinto Ferial Xmatkuil',
+    loadIn:'2026-11-01', showDate:'2026-11-06', loadOut:'2026-12-03',
+    warehouse:'Monterrey', distance:1950, roof:'Borse Techos 25 x 20', wingSize:'', clearance:'', workingArea:'',
+    notes:'Month-long fair (Nov 6–29), roof stays up through the run. Show date set to the fair\'s opening day.'
+  },
+  {
+    id:'seed6', name:'Tecate Comuna', city:'San Andrés Cholula, Puebla', venue:'Foro Cholula',
+    loadIn:'2026-11-21', showDate:'2026-11-28', loadOut:'',
+    warehouse:'Monterrey', distance:1030, roof:'Borse Techos 25 x 20', wingSize:'', clearance:'', workingArea:'',
+    notes:'Load-out date not yet provided — add it when confirmed.'
+  }
+];
+
+const WAREHOUSE = 'Monterrey, Nuevo León';
+
+async function fetchDistanceKm(originText, destText){
+  // Auto-lookup used Claude's built-in web search, which only works inside
+  // Claude's own environment. In this standalone deployment, distance has
+  // to be entered manually — the app's existing error handling already
+  // falls back to that gracefully wherever this function is called.
+  throw new Error('Auto-calculate is not available in this standalone deployment — enter distance manually.');
+}
+
+function destLabel(show){
+  return show.venue ? `${show.venue}, ${show.city}` : show.city;
+}
+
+async function calculateDistance(){
+  const city = document.getElementById('f_city').value.trim();
+  const venue = document.getElementById('f_venue').value.trim();
+  const statusEl = document.getElementById('calcStatus');
+  if(!city){
+    statusEl.textContent = 'Enter a city first.';
+    statusEl.style.color = 'var(--danger)';
+    return;
+  }
+  const btn = document.getElementById('calcDistBtn');
+  const origLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '…';
+  statusEl.style.color = 'var(--steel)';
+  statusEl.textContent = 'Looking up road distance…';
+  try{
+    const destination = venue ? `${venue}, ${city}` : city;
+    const result = await fetchDistanceKm(WAREHOUSE, destination);
+    document.getElementById('f_distance').value = result.km;
+    statusEl.style.color = 'var(--good)';
+    statusEl.textContent = `${result.km} km${result.note ? ' — '+result.note : ''}. Verify before dispatch.`;
+  }catch(e){
+    console.error('Distance lookup failed', e);
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = 'Could not calculate — enter distance manually.';
+  }finally{
+    btn.disabled = false;
+    btn.textContent = origLabel;
+  }
+}
+
+async function quickCalcDistance(id){
+  const show = shows.find(s=>s.id===id);
+  if(!show || !show.city) return;
+  const el = document.getElementById('detail');
+  el.style.opacity = '0.6';
+  try{
+    const result = await fetchDistanceKm(WAREHOUSE, destLabel(show));
+    show.distance = result.km;
+    await persistShows();
+  }catch(e){
+    console.error('Quick distance calc failed', e);
+  }finally{
+    el.style.opacity = '1';
+    render();
+  }
+}
+
+async function loadShows(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    shows = res && res.value ? JSON.parse(res.value) : null;
+  }catch(e){
+    shows = null;
+  }
+  if(!shows){
+    shows = SEED;
+    await persistShows();
+  }
+  try{
+    const res = await window.storage.get(ROUTES_KEY, false);
+    routes = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){
+    routes = [];
+  }
+  publishedRoutes = await readSharedRoutes();
+  render();
+}
+
+async function persistShows(){
+  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(shows), false); }
+  catch(e){ console.error('Could not save', e); }
+}
+
+async function persistRoutes(){
+  try{ await window.storage.set(ROUTES_KEY, JSON.stringify(routes), false); }
+  catch(e){ console.error('Could not save routes', e); }
+}
+
+let editingId = null;
+let formTrucks = [];
+
+function getTruckList(show){
+  if(Array.isArray(show.trucks)) return show.trucks;
+  if(show.truckCount !== undefined && show.truckCount !== ''){
+    return [{ type: show.truckType || '48ft', count: show.truckCount }];
+  }
+  return [{ type:'48ft', count:2 }];
+}
+
+function fmtTruckList(list){
+  const filtered = (list || []).filter(t => (parseInt(t.count)||0) > 0);
+  if(filtered.length===0) return 'None assigned';
+  return filtered.map(t => `${t.count}× ${t.type}`).join(' + ');
+}
+
+function renderTruckRows(){
+  const el = document.getElementById('truckRows');
+  if(!el) return;
+  el.innerHTML = formTrucks.map((t, idx) => `
+    <div class="truck-row">
+      <span style="flex:0 0 auto; color:var(--steel); display:flex; align-items:center;">${truckIcon()}</span>
+      <select onchange="updateTruckRow(${idx}, 'type', this.value)">
+        <option value="48ft" ${t.type==='48ft'?'selected':''}>48ft</option>
+        <option value="45ft" ${t.type==='45ft'?'selected':''}>45ft</option>
+        <option value="40ft" ${t.type==='40ft'?'selected':''}>40ft</option>
+      </select>
+      <input type="number" min="0" value="${t.count}" onchange="updateTruckRow(${idx}, 'count', this.value)">
+      <button type="button" class="truck-row-remove" onclick="removeTruckRow(${idx})" ${formTrucks.length<=1?'style="visibility:hidden;"':''}>✕</button>
+    </div>
+  `).join('');
+}
+
+function addTruckRow(){
+  formTrucks.push({ type:'48ft', count:1 });
+  renderTruckRows();
+}
+function removeTruckRow(idx){
+  if(formTrucks.length<=1) return;
+  formTrucks.splice(idx,1);
+  renderTruckRows();
+}
+function updateTruckRow(idx, field, value){
+  if(!formTrucks[idx]) return;
+  if(field==='count') formTrucks[idx].count = parseInt(value,10) || 0;
+  else formTrucks[idx].type = value;
+}
+
+function openModal(){
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'Add show';
+  document.getElementById('deleteInModal').style.display = 'none';
+  ['f_name','f_city','f_venue','f_loadin','f_loadin_time','f_showdate','f_loadout','f_distance','f_clearance','f_workingarea','f_notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f_wingsize').value = '';
+  document.getElementById('f_roof').value = 'Borse Techos 25 x 20';
+  formTrucks = [{ type:'48ft', count:2 }];
+  renderTruckRows();
+  document.getElementById('f_smalltruck35').value = '';
+  document.getElementById('f_piolin').value = '';
+  document.getElementById('calcStatus').textContent = '';
+  document.getElementById('overlay').classList.add('show');
+}
+
+function openEditModal(id){
+  const show = shows.find(s=>s.id===id);
+  if(!show) return;
+  editingId = id;
+  document.getElementById('modalTitle').textContent = 'Edit show';
+  document.getElementById('deleteInModal').style.display = 'inline-block';
+  document.getElementById('f_name').value = show.name || '';
+  document.getElementById('f_city').value = show.city || '';
+  document.getElementById('f_venue').value = show.venue || '';
+  document.getElementById('f_loadin').value = show.loadIn || '';
+  document.getElementById('f_loadin_time').value = show.loadInTime || '';
+  document.getElementById('f_showdate').value = show.showDate || '';
+  document.getElementById('f_loadout').value = show.loadOut || '';
+  document.getElementById('f_distance').value = show.distance || '';
+  document.getElementById('f_roof').value = show.roof || 'Borse Techos 25 x 20';
+  document.getElementById('f_wingsize').value = show.wingSize || '';
+  document.getElementById('f_clearance').value = show.clearance || '';
+  document.getElementById('f_workingarea').value = show.workingArea || '';
+  formTrucks = getTruckList(show).map(t => ({ ...t }));
+  if(formTrucks.length===0) formTrucks = [{ type:'48ft', count:0 }];
+  renderTruckRows();
+  document.getElementById('f_smalltruck35').value = show.smallTruck35 || '';
+  document.getElementById('f_piolin').value = show.piolin || '';
+  document.getElementById('f_notes').value = show.notes || '';
+  document.getElementById('calcStatus').textContent = '';
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('show'); editingId = null; }
+
+async function saveShow(){
+  const name = document.getElementById('f_name').value.trim();
+  const loadIn = document.getElementById('f_loadin').value;
+  if(!name || !loadIn){ alert('Event name and load-in date are required.'); return; }
+  const data = {
+    name,
+    city: document.getElementById('f_city').value.trim(),
+    venue: document.getElementById('f_venue').value.trim(),
+    loadIn,
+    loadInTime: document.getElementById('f_loadin_time').value,
+    showDate: document.getElementById('f_showdate').value,
+    loadOut: document.getElementById('f_loadout').value,
+    warehouse: 'Monterrey',
+    distance: parseFloat(document.getElementById('f_distance').value) || '',
+    roof: document.getElementById('f_roof').value,
+    wingSize: document.getElementById('f_wingsize').value,
+    clearance: parseFloat(document.getElementById('f_clearance').value) || '',
+    workingArea: parseFloat(document.getElementById('f_workingarea').value) || '',
+    trucks: formTrucks.filter(t => (parseInt(t.count)||0) > 0).map(t => ({ type:t.type, count:parseInt(t.count)||0 })),
+    smallTruck35: parseInt(document.getElementById('f_smalltruck35').value, 10) || 0,
+    piolin: parseInt(document.getElementById('f_piolin').value, 10) || 0,
+    notes: document.getElementById('f_notes').value.trim()
+  };
+  if(editingId){
+    const idx = shows.findIndex(s=>s.id===editingId);
+    if(idx > -1) shows[idx] = { ...shows[idx], ...data };
+    selectedId = editingId;
+  }else{
+    const show = { id: 's' + Date.now(), ...data };
+    shows.push(show);
+    selectedId = show.id;
+  }
+  await persistShows();
+  closeModal();
+  render();
+}
+
+async function deleteFromModal(){
+  if(!editingId) return;
+  if(!confirm('Remove this show from the board?')) return;
+  shows = shows.filter(s=>s.id!==editingId);
+  if(selectedId===editingId) selectedId=null;
+  await persistShows();
+  closeModal();
+  render();
+}
+
+async function deleteShow(id, evt){
+  evt.stopPropagation();
+  if(!confirm('Remove this show from the board?')) return;
+  shows = shows.filter(s=>s.id!==id);
+  if(selectedId===id) selectedId=null;
+  await persistShows();
+  render();
+}
+
+function daysBetween(dateStr){
+  if(!dateStr) return null;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const d = new Date(dateStr+'T00:00:00');
+  return Math.round((d-now)/86400000);
+}
+function daysDiff(a,b){
+  if(!a || !b) return null;
+  return Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00'))/86400000);
+}
+function fmtDate(dateStr){
+  if(!dateStr) return '—';
+  const d = new Date(dateStr+'T00:00:00');
+  return d.toLocaleDateString('en-US',{month:'short', day:'numeric', year:'numeric'});
+}
+function fmtShort(dateStr){
+  if(!dateStr) return '?';
+  const d = new Date(dateStr+'T00:00:00');
+  return d.toLocaleDateString('en-US',{month:'short', day:'numeric'});
+}
+
+function fmtTime(timeStr){
+  if(!timeStr) return '';
+  const [h,m] = timeStr.split(':').map(Number);
+  const period = h>=12 ? 'PM' : 'AM';
+  const h12 = h%12===0 ? 12 : h%12;
+  return `${h12}:${String(m).padStart(2,'0')} ${period}`;
+}
+
+function truckingTime(distanceKm){
+  if(!distanceKm) return null;
+  const hours = distanceKm / 55; // non-stop, no rest stops
+  const days = Math.floor(hours / 24);
+  const remHours = Math.round(hours - days*24);
+  return { hours: Math.round(hours*10)/10, days, remHours };
+}
+
+function fmtTrucking(t){
+  if(!t) return null;
+  if(t.days > 0) return `${t.days}d ${t.remHours}h`;
+  return `${t.hours}h`;
+}
+
+function metrics(show){
+  const daysToLoadIn = daysBetween(show.loadIn);
+  const buildDays = daysDiff(show.loadIn, show.showDate);
+  const strikeDays = show.showDate ? daysDiff(show.showDate, show.loadOut) : daysDiff(show.loadIn, show.loadOut);
+  const onSiteDays = daysDiff(show.loadIn, show.loadOut);
+  const trucks = getTruckList(show).reduce((sum,t)=> sum + (parseInt(t.count)||0), 0);
+  const trucking = truckingTime(show.distance);
+  const missingLoadOut = !show.loadOut;
+  return { daysToLoadIn, buildDays, strikeDays, onSiteDays, trucks, trucking, missingLoadOut };
+}
+
+function render(){ renderSummary(); renderTimeline(); renderDetail(); renderGantt(); renderRoutes(); renderNext(); }
+
+let currentTab = 'next';
+function switchTab(tab){
+  currentTab = tab;
+  document.getElementById('nextView').classList.toggle('active', tab==='next');
+  document.getElementById('boardView').classList.toggle('active', tab==='board');
+  document.getElementById('ganttView').classList.toggle('active', tab==='gantt');
+  document.getElementById('routesView').classList.toggle('active', tab==='routes');
+  document.getElementById('tabNextBtn').classList.toggle('active', tab==='next');
+  document.getElementById('tabBoardBtn').classList.toggle('active', tab==='board');
+  document.getElementById('tabGanttBtn').classList.toggle('active', tab==='gantt');
+  document.getElementById('tabRoutesBtn').classList.toggle('active', tab==='routes');
+  if(tab==='next') renderNext();
+  if(tab==='gantt') renderGantt();
+  if(tab==='routes') renderRoutes();
+}
+
+function friendlyDaysLabel(days){
+  if(days===0) return 'TODAY';
+  if(days===1) return 'TOMORROW';
+  if(days>1) return `IN ${days} DAYS`;
+  if(days===-1) return 'YESTERDAY';
+  if(days<-1) return `${Math.abs(days)} DAYS AGO`;
+  return '';
+}
+
+function showStatus(show, overlapIds){
+  if(overlapIds.has(show.id)) return { level:'red', label:'Conflict — check with office' };
+  const m = metrics(show);
+  if(show.distance && m.trucking && m.daysToLoadIn!==null && (m.trucking.hours/24) > m.daysToLoadIn){
+    return { level:'amber', label:'Get moving — tight on time' };
+  }
+  if(!show.loadOut) return { level:'amber', label:'Load-out not set yet' };
+  return { level:'green', label:'On track' };
+}
+
+function renderNext(){
+  const el = document.getElementById('nextContent');
+  if(!el) return;
+  if(shows.length===0){
+    el.innerHTML = `<div class="next-empty">Nothing scheduled yet. Tap "+ Add show" to get started.</div>`;
+    return;
+  }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayStr = today.toISOString().slice(0,10);
+  const overlapIds = findOverlapIds();
+  const sorted = [...shows].sort((a,b)=> a.loadIn.localeCompare(b.loadIn));
+
+  const current = sorted.find(s => s.loadIn <= todayStr && (s.loadOut ? s.loadOut >= todayStr : true));
+  let heroShow = null;
+  let heroHtml = '';
+
+  if(current){
+    heroShow = current;
+    const phase = !current.showDate ? 'On site'
+      : (todayStr < current.showDate ? 'Building'
+      : (todayStr === current.showDate ? 'Show day' : 'Striking'));
+    let status;
+    if(overlapIds.has(current.id)) status = { level:'red', label:'Conflict — check with office' };
+    else if(phase === 'Show day') status = { level:'green', label:'Showtime' };
+    else status = { level:'amber', label: phase+' — gear is on site' };
+
+    heroHtml = `
+      <div class="hero status-${status.level}">
+        <div class="hero-eyebrow">Happening now</div>
+        <div class="hero-title">${escapeHtml(current.name)}</div>
+        <div class="hero-sub">${escapeHtml(current.venue)}${current.venue&&current.city?', ':''}${escapeHtml(current.city)}</div>
+        <div class="hero-when status-${status.level}">${phase.toUpperCase()} — ${escapeHtml(status.label)}</div>
+        <div class="hero-facts">
+          <div><div class="hero-fact-label">Load-in</div><div class="hero-fact-value">${fmtDate(current.loadIn)}</div></div>
+          ${current.showDate ? `<div><div class="hero-fact-label">Show</div><div class="hero-fact-value">${fmtDate(current.showDate)}</div></div>` : ''}
+          <div><div class="hero-fact-label">Load-out</div><div class="hero-fact-value">${current.loadOut ? fmtDate(current.loadOut) : 'Not set'}</div></div>
+          <div><div class="hero-fact-label">Roof</div><div class="hero-fact-value">${escapeHtml(current.roof)}</div></div>
+        </div>
+      </div>
+    `;
+  }else{
+    const upcoming = sorted.filter(s => s.loadIn >= todayStr);
+    if(upcoming.length){
+      heroShow = upcoming[0];
+      const days = daysBetween(heroShow.loadIn);
+      const status = showStatus(heroShow, overlapIds);
+      heroHtml = `
+        <div class="hero status-${status.level}">
+          <div class="hero-eyebrow">Next up</div>
+          <div class="hero-title">${escapeHtml(heroShow.name)}</div>
+          <div class="hero-sub">${escapeHtml(heroShow.venue)}${heroShow.venue&&heroShow.city?', ':''}${escapeHtml(heroShow.city)}</div>
+          <div class="hero-when status-${status.level}">${friendlyDaysLabel(days)}${heroShow.loadInTime ? ' · '+fmtTime(heroShow.loadInTime) : ''}</div>
+          <div class="hero-facts">
+            <div><div class="hero-fact-label">Load-in</div><div class="hero-fact-value">${fmtDate(heroShow.loadIn)}</div></div>
+            ${heroShow.showDate ? `<div><div class="hero-fact-label">Show</div><div class="hero-fact-value">${fmtDate(heroShow.showDate)}</div></div>` : ''}
+            <div><div class="hero-fact-label">Roof</div><div class="hero-fact-value">${escapeHtml(heroShow.roof)}</div></div>
+            <div><div class="hero-fact-label">Status</div><div class="hero-fact-value">${escapeHtml(status.label)}</div></div>
+          </div>
+        </div>
+      `;
+    }else{
+      heroHtml = `<div class="next-empty">No upcoming shows on the board right now.</div>`;
+    }
+  }
+
+  const restUpcoming = sorted
+    .filter(s => !heroShow || s.id !== heroShow.id)
+    .filter(s => s.loadIn >= todayStr || (s.loadOut && s.loadOut >= todayStr))
+    .slice(0, 5);
+
+  const listHtml = restUpcoming.length ? `
+    <div class="next-section-title">Coming up after that</div>
+    ${restUpcoming.map(s=>{
+      const status = showStatus(s, overlapIds);
+      const li = new Date(s.loadIn+'T00:00:00');
+      const liMonth = li.toLocaleDateString('en-US',{month:'short'});
+      const liDay = li.getDate();
+      let showBlock = `<div class="next-row-date unset"><span class="next-row-date-label">Show</span>—</div>`;
+      if(s.showDate){
+        const sd = new Date(s.showDate+'T00:00:00');
+        const sdMonth = sd.toLocaleDateString('en-US',{month:'short'});
+        const sdDay = sd.getDate();
+        showBlock = `<div class="next-row-date"><span class="next-row-date-label">Show</span>${sdMonth}<span class="day-num">${sdDay}</span></div>`;
+      }
+      return `
+        <div class="next-row" onclick="selectShow('${s.id}'); switchTab('board');">
+          <div class="next-row-dates">
+            <div class="next-row-date"><span class="next-row-date-label">Load-in</span>${liMonth}<span class="day-num">${liDay}</span></div>
+            ${showBlock}
+          </div>
+          <div class="next-row-body">
+            <div class="next-row-name">${escapeHtml(s.name)}</div>
+            <div class="next-row-city">${escapeHtml(s.city)}</div>
+          </div>
+          <div class="next-pill status-${status.level}">${escapeHtml(status.label)}</div>
+        </div>
+      `;
+    }).join('')}
+  ` : '';
+
+  el.innerHTML = heroHtml + listHtml;
+}
+
+function findOverlapIds(){
+  const overlaps = new Set();
+  const ranges = shows.map(s=>({
+    id:s.id,
+    start:new Date(s.loadIn+'T00:00:00'),
+    end:new Date((s.loadOut || s.loadIn)+'T23:59:59')
+  }));
+  for(let i=0;i<ranges.length;i++){
+    for(let j=i+1;j<ranges.length;j++){
+      if(ranges[i].start <= ranges[j].end && ranges[j].start <= ranges[i].end){
+        overlaps.add(ranges[i].id);
+        overlaps.add(ranges[j].id);
+      }
+    }
+  }
+  return overlaps;
+}
+
+const DAY_WIDTH = 20;
+let ganttMode = 'shows';
+
+function setGanttMode(mode){
+  ganttMode = mode;
+  document.getElementById('ganttModeShowsBtn').classList.toggle('active', mode==='shows');
+  document.getElementById('ganttModeRoutesBtn').classList.toggle('active', mode==='routes');
+  renderGantt();
+}
+
+function computeGanttRange(){
+  const sorted = [...shows].sort((a,b)=>new Date(a.loadIn)-new Date(b.loadIn));
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  let minDate = new Date(sorted[0].loadIn+'T00:00:00');
+  let maxDate = new Date(minDate);
+  sorted.forEach(s=>{
+    const start = new Date(s.loadIn+'T00:00:00');
+    const end = new Date((s.loadOut || addDays(s.loadIn, 10))+'T00:00:00');
+    if(start < minDate) minDate = start;
+    if(end > maxDate) maxDate = end;
+  });
+  if(today < minDate) minDate = new Date(today);
+  if(today > maxDate) maxDate = new Date(today);
+  minDate = addDaysDate(minDate, -2);
+  maxDate = addDaysDate(maxDate, 2);
+  const totalDays = Math.max(1, Math.round((maxDate-minDate)/86400000));
+  const trackWidth = totalDays * DAY_WIDTH;
+
+  function xFor(dateStr){
+    const d = new Date(dateStr+'T00:00:00');
+    return Math.round((d-minDate)/86400000) * DAY_WIDTH;
+  }
+
+  let ticksHtml = '';
+  for(let i=0;i<=totalDays;i+=4){
+    const d = addDaysDate(minDate, i);
+    ticksHtml += `<div class="gantt-tick" style="left:${i*DAY_WIDTH}px; width:${4*DAY_WIDTH}px;">${d.toLocaleDateString('en-US',{month:'short', day:'numeric'})}</div>`;
+  }
+
+  const todayX = Math.round((today-minDate)/86400000) * DAY_WIDTH;
+  return { minDate, totalDays, trackWidth, xFor, todayX, ticksHtml };
+}
+
+function ganttBarInfo(show, xFor, overlapIds){
+  const m = metrics(show);
+  const left = xFor(show.loadIn);
+  const endDateStr = show.loadOut || addDays(show.loadIn, 3);
+  let width = xFor(endDateStr) - left;
+  if(width < DAY_WIDTH) width = DAY_WIDTH;
+  const isOverlap = overlapIds.has(show.id);
+  const isTight = show.distance && m.trucking && m.daysToLoadIn!==null && (m.trucking.hours/24) > m.daysToLoadIn;
+  const isOpenEnd = !show.loadOut;
+  let cls = 'gantt-bar';
+  if(isOverlap) cls += ' overlap';
+  else if(isTight) cls += ' tight';
+  if(isOpenEnd) cls += ' open-end';
+  return { left, width, isOverlap, isTight, cls };
+}
+
+function renderShowGanttRow(s, xFor, todayX, trackWidth, overlapIds, legNum){
+  const { left, width, isOverlap, isTight, cls } = ganttBarInfo(s, xFor, overlapIds);
+  let showMarker = '';
+  if(s.showDate){
+    const sx = xFor(s.showDate) - left + (DAY_WIDTH/2);
+    showMarker = `<div class="gantt-show-marker" style="left:${sx}px;" title="Show: ${fmtDate(s.showDate)}"></div>`;
+  }
+  const numBadge = legNum ? `<div class="gantt-leg-num">${legNum}</div>` : '';
+  return `
+    <div class="gantt-row">
+      <div class="gantt-label" onclick="selectShow('${s.id}'); switchTab('board');">
+        <div class="gantt-label-name">${escapeHtml(s.name)}</div>
+        <div class="gantt-label-city">${escapeHtml(s.city)}${isOverlap ? ' · ⚠ overlap' : ''}${isTight && !isOverlap ? ' · ⚠ tight drive' : ''}</div>
+      </div>
+      <div class="gantt-track" style="width:${trackWidth}px; background-image: repeating-linear-gradient(to right, var(--line) 0, var(--line) 1px, transparent 1px, transparent ${4*DAY_WIDTH}px);">
+        <div class="gantt-today" style="left:${todayX}px;"></div>
+        <div class="${cls}" style="left:${left}px; width:${width}px;" onclick="selectShow('${s.id}'); switchTab('board');" title="${escapeHtml(s.name)}: ${fmtDate(s.loadIn)} → ${s.loadOut ? fmtDate(s.loadOut) : 'load-out TBD'}">
+          ${numBadge}
+          ${showMarker}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderRouteGanttRow(route, xFor, todayX, trackWidth, overlapIds){
+  const bars = route.showIds.map((showId, idx)=>{
+    const show = shows.find(s=>s.id===showId);
+    if(!show) return null;
+    const { left, width, cls } = ganttBarInfo(show, xFor, overlapIds);
+    let showMarker = '';
+    if(show.showDate){
+      const sx = xFor(show.showDate) - left + (DAY_WIDTH/2);
+      showMarker = `<div class="gantt-show-marker" style="left:${sx}px;" title="Show: ${fmtDate(show.showDate)}"></div>`;
+    }
+    return {
+      left, width,
+      html: `<div class="${cls}" style="left:${left}px; width:${width}px;" onclick="selectShow('${show.id}'); switchTab('board');" title="${escapeHtml(show.name)}: ${fmtDate(show.loadIn)} → ${show.loadOut ? fmtDate(show.loadOut) : 'load-out TBD'}">
+        <div class="gantt-leg-num">${idx+1}</div>
+        ${showMarker}
+      </div>`
+    };
+  });
+
+  if(bars.every(b=>!b)) return '';
+
+  let connectorsHtml = '';
+  for(let i=1;i<bars.length;i++){
+    if(!bars[i-1] || !bars[i]) continue;
+    const timing = legTimingStatus(route, i);
+    const prevRight = bars[i-1].left + bars[i-1].width;
+    const nextLeft = bars[i].left;
+    const color = timing.level==='bad' ? 'var(--danger)' : timing.level==='tight' ? 'var(--amber)' : timing.level==='ok' ? 'var(--good)' : 'var(--line)';
+    const connWidth = Math.max(2, nextLeft - prevRight);
+    connectorsHtml += `<div class="gantt-connector" style="left:${prevRight}px; width:${connWidth}px; background:${color};" title="${escapeHtml(timing.text || ('Leg '+i))}"></div>`;
+  }
+
+  const showCount = bars.filter(Boolean).length;
+
+  return `
+    <div class="gantt-row">
+      <div class="gantt-label" onclick="switchTab('routes');">
+        <div class="gantt-label-name">${escapeHtml(route.name)}</div>
+        <div class="gantt-label-city">${showCount} show${showCount!==1?'s':''} in route</div>
+      </div>
+      <div class="gantt-track" style="width:${trackWidth}px; background-image: repeating-linear-gradient(to right, var(--line) 0, var(--line) 1px, transparent 1px, transparent ${4*DAY_WIDTH}px);">
+        <div class="gantt-today" style="left:${todayX}px;"></div>
+        ${connectorsHtml}
+        ${bars.map(b=> b ? b.html : '').join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderGantt(){
+  const el = document.getElementById('ganttContent');
+  if(!el) return;
+  if(shows.length===0){
+    el.innerHTML = `<div class="empty" style="margin:16px;">No shows yet — add one to see the timeline.</div>`;
+    return;
+  }
+
+  const { totalDays, trackWidth, xFor, todayX, ticksHtml } = computeGanttRange();
+  const overlapIds = findOverlapIds();
+
+  let rowsHtml = '';
+
+  if(ganttMode === 'routes'){
+    const routesWithShows = routes.filter(r=>r.showIds.length>0);
+    routesWithShows.forEach(route=>{
+      rowsHtml += renderRouteGanttRow(route, xFor, todayX, trackWidth, overlapIds);
+    });
+    const routedIds = routedShowIds();
+    const unrouted = [...shows].filter(s=>!routedIds.has(s.id)).sort((a,b)=>new Date(a.loadIn)-new Date(b.loadIn));
+    if(unrouted.length){
+      rowsHtml += `<div class="gantt-section-label">Not yet in a route</div>`;
+      unrouted.forEach(s=>{ rowsHtml += renderShowGanttRow(s, xFor, todayX, trackWidth, overlapIds); });
+    }
+    if(routesWithShows.length===0 && unrouted.length===0){
+      rowsHtml = `<div class="empty" style="margin:16px;">No routes yet — build one on the Routes tab.</div>`;
+    }
+  }else{
+    const sorted = [...shows].sort((a,b)=>new Date(a.loadIn)-new Date(b.loadIn));
+    rowsHtml = sorted.map(s=>renderShowGanttRow(s, xFor, todayX, trackWidth, overlapIds)).join('');
+  }
+
+  el.innerHTML = `
+    <div class="gantt-header-row">
+      <div class="gantt-label-spacer">${ganttMode==='routes' ? 'Route' : 'Show'}</div>
+      <div class="gantt-ticks" style="width:${trackWidth}px;">
+        ${ticksHtml}
+        <div class="gantt-today" style="left:${todayX}px;"></div>
+      </div>
+    </div>
+    ${rowsHtml}
+  `;
+}
+
+function addDays(dateStr, n){
+  const d = new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate()+n);
+  return d.toISOString().slice(0,10);
+}
+function addDaysDate(dateObj, n){
+  const d = new Date(dateObj);
+  d.setDate(d.getDate()+n);
+  return d;
+}
+
+// ---------- Routes ----------
+
+async function createRoute(){
+  const route = { id:'rt'+Date.now(), name:'New route', showIds:[], legDistances:{}, status:'draft' };
+  routes.push(route);
+  await persistRoutes();
+  render();
+}
+
+async function deleteRoute(id){
+  if(!confirm('Delete this route? Shows stay on the board, just unlinked. If it was published, it will be unpublished too.')) return;
+  routes = routes.filter(r=>r.id!==id);
+  await persistRoutes();
+  if(publishedRoutes.some(r=>r.id===id)){
+    await unpublishFromShared(id);
+  }
+  render();
+}
+
+async function renameRoute(id, newName){
+  const route = routes.find(r=>r.id===id);
+  if(!route) return;
+  route.name = newName.trim() || 'Untitled route';
+  await persistRoutes();
+}
+
+function routedShowIds(){
+  const set = new Set();
+  routes.forEach(r=>r.showIds.forEach(id=>set.add(id)));
+  return set;
+}
+
+async function addShowToRoute(routeId, showId){
+  if(!showId) return;
+  const route = routes.find(r=>r.id===routeId);
+  if(!route) return;
+  route.showIds.push(showId);
+  await persistRoutes();
+  render();
+  // auto-calc the new leg's distance
+  const legIdx = route.showIds.length - 1;
+  calcLegDistance(routeId, legIdx);
+}
+
+async function removeShowFromRoute(routeId, idx){
+  const route = routes.find(r=>r.id===routeId);
+  if(!route) return;
+  route.showIds.splice(idx,1);
+  await persistRoutes();
+  render();
+}
+
+async function moveLeg(routeId, idx, dir){
+  const route = routes.find(r=>r.id===routeId);
+  if(!route) return;
+  const newIdx = idx+dir;
+  if(newIdx<0 || newIdx>=route.showIds.length) return;
+  [route.showIds[idx], route.showIds[newIdx]] = [route.showIds[newIdx], route.showIds[idx]];
+  await persistRoutes();
+  render();
+}
+
+function legKey(route, idx){
+  const fromId = idx===0 ? 'WAREHOUSE' : route.showIds[idx-1];
+  const toId = route.showIds[idx];
+  return `${fromId}__${toId}`;
+}
+
+const pendingLegCalcs = {};
+
+async function calcLegDistance(routeId, idx){
+  const route = routes.find(r=>r.id===routeId);
+  if(!route) return;
+  const toShow = shows.find(s=>s.id===route.showIds[idx]);
+  if(!toShow) return;
+  const fromShow = idx===0 ? null : shows.find(s=>s.id===route.showIds[idx-1]);
+  const origin = fromShow ? destLabel(fromShow) : WAREHOUSE;
+  const key = legKey(route, idx);
+  const pendingKey = routeId+'::'+idx;
+  const statusEl = document.getElementById('legstatus-'+routeId+'-'+idx);
+  if(statusEl) statusEl.textContent = '…';
+  const promise = (async () => {
+    try{
+      const result = await fetchDistanceKm(origin, destLabel(toShow));
+      route.legDistances[key] = result.km;
+      await persistRoutes();
+    }catch(e){
+      console.error('Leg distance calc failed', e);
+    }
+  })();
+  pendingLegCalcs[pendingKey] = promise;
+  await promise;
+  delete pendingLegCalcs[pendingKey];
+  renderRoutes();
+}
+
+function legTimingStatus(route, idx){
+  // returns {level:'ok'|'tight'|'bad'|'none', text}
+  const toShow = shows.find(s=>s.id===route.showIds[idx]);
+  const km = route.legDistances[legKey(route, idx)];
+  if(idx===0){
+    return { level:'none', text:'' };
+  }
+  const fromShow = shows.find(s=>s.id===route.showIds[idx-1]);
+  if(!fromShow || !toShow) return { level:'none', text:'' };
+  if(!fromShow.loadOut) return { level:'tight', text:'set load-out on previous show' };
+  const availableDays = daysDiff(fromShow.loadOut, toShow.loadIn);
+  if(availableDays===null) return { level:'none', text:'' };
+  if(!km) return { level:'none', text:'no distance yet' };
+  const t = truckingTime(km);
+  const requiredDays = Math.ceil(t.hours/24) || 1;
+  if(availableDays < 0) return { level:'bad', text:`load-in is before previous load-out` };
+  if(availableDays < requiredDays) return { level:'bad', text:`needs ${requiredDays}d transit, only ${availableDays}d available` };
+  if(availableDays - requiredDays <= 1) return { level:'tight', text:`${availableDays}d available, ${requiredDays}d needed` };
+  return { level:'ok', text:`${availableDays}d available, ${requiredDays}d needed` };
+}
+
+function buildRouteSnapshot(route){
+  const legs = route.showIds.map((showId, idx)=>{
+    const show = shows.find(s=>s.id===showId);
+    const fromShow = idx===0 ? null : shows.find(s=>s.id===route.showIds[idx-1]);
+    const km = route.legDistances[legKey(route, idx)] || null;
+    const timing = legTimingStatus(route, idx);
+    return {
+      fromLabel: idx===0 ? 'Monterrey warehouse' : (fromShow ? fromShow.name : '?'),
+      toLabel: show ? show.name : '?',
+      toCity: show ? show.city : '',
+      distance: km,
+      timingLevel: timing.level,
+      timingText: timing.text
+    };
+  });
+  const totalKm = legs.reduce((sum,l)=> sum + (l.distance || 0), 0);
+  const tightCount = legs.filter(l=>l.timingLevel==='tight').length;
+  const badCount = legs.filter(l=>l.timingLevel==='bad').length;
+  return {
+    id: route.id,
+    name: route.name,
+    publishedAt: new Date().toISOString(),
+    showsCount: route.showIds.length,
+    totalKm,
+    tightCount,
+    badCount,
+    legs
+  };
+}
+
+async function readSharedRoutes(){
+  try{
+    const res = await window.storage.get(SHARED_ROUTES_KEY, true);
+    return res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){
+    // storage.get() throws for a key that's never been set — normal before
+    // anyone has ever published anything, not a real failure
+    return [];
+  }
+}
+
+async function unpublishFromShared(routeId){
+  try{
+    let list = await readSharedRoutes();
+    list = list.filter(r=>r.id!==routeId);
+    await window.storage.set(SHARED_ROUTES_KEY, JSON.stringify(list), true);
+    publishedRoutes = list;
+  }catch(e){
+    console.error('Unpublish failed', e);
+  }
+}
+
+async function publishRoute(routeId){
+  const route = routes.find(r=>r.id===routeId);
+  if(!route) return;
+  if(route.showIds.length===0){
+    alert('Add at least one show to this route before publishing.');
+    return;
+  }
+  const btn = document.getElementById('publishbtn-'+routeId);
+
+  const pending = Object.keys(pendingLegCalcs).filter(k=>k.startsWith(routeId+'::')).map(k=>pendingLegCalcs[k]);
+  if(pending.length){
+    if(btn){ btn.disabled = true; btn.textContent = 'Finishing distance calc…'; }
+    await Promise.all(pending);
+  }
+
+  if(btn){ btn.disabled = true; btn.textContent = 'Publishing…'; }
+
+  const snapshot = buildRouteSnapshot(route);
+  const list = await readSharedRoutes();
+  try{
+    const updated = list.filter(r=>r.id!==routeId);
+    updated.push(snapshot);
+    await window.storage.set(SHARED_ROUTES_KEY, JSON.stringify(updated), true);
+    publishedRoutes = updated;
+    // only mark as published — and only persist that — once the shared write actually succeeded
+    route.status = 'published';
+    await persistRoutes();
+  }catch(e){
+    console.error('Publish failed', e);
+    alert("Couldn't publish this route — the shared board wasn't reachable. It's still a draft; try again in a moment.");
+  }
+  render();
+}
+
+async function unpublishRoute(routeId){
+  const route = routes.find(r=>r.id===routeId);
+  if(route) route.status = 'draft';
+  await persistRoutes();
+  await unpublishFromShared(routeId);
+  render();
+}
+
+async function refreshPublished(){
+  publishedRoutes = await readSharedRoutes();
+  renderPublishedComparison();
+}
+
+function renderPublishedComparison(){
+  const el = document.getElementById('publishedCompare');
+  if(!el) return;
+  if(!publishedRoutes || publishedRoutes.length===0){
+    el.innerHTML = `<div class="empty">No published routes yet. Publish a route above and it'll show up here — visible to anyone who opens this board, for side-by-side comparison.</div>`;
+    return;
+  }
+  const sorted = [...publishedRoutes].sort((a,b)=>new Date(b.publishedAt)-new Date(a.publishedAt));
+  const rows = [
+    { label:'Shows', get:r=>r.showsCount },
+    { label:'Total distance', get:r=>`${r.totalKm} km` },
+    { label:'On the road', get:r=>r.totalKm ? fmtTrucking(truckingTime(r.totalKm)) : '—' },
+    { label:'Tight legs', get:r=>r.tightCount, cls:r=>r.tightCount>0?'warn-cell':'' },
+    { label:'Conflicts', get:r=>r.badCount, cls:r=>r.badCount>0?'bad-cell':'' },
+    { label:'Published', get:r=>fmtDate(r.publishedAt.slice(0,10)) }
+  ];
+  el.innerHTML = `
+    <div class="compare-wrap">
+      <table class="compare-table">
+        <thead>
+          <tr><th>Route</th>${sorted.map(r=>`<th>${escapeHtml(r.name)}</th>`).join('')}</tr>
+        </thead>
+        <tbody>
+          ${rows.map(row=>`
+            <tr>
+              <th>${row.label}</th>
+              ${sorted.map(r=>`<td class="${row.cls ? row.cls(r) : ''}">${row.get(r)}</td>`).join('')}
+            </tr>
+          `).join('')}
+          <tr>
+            <th></th>
+            ${sorted.map(r=>`<td><button class="leg-remove-btn" onclick="unpublishRoute('${r.id}')">unpublish</button></td>`).join('')}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderRoutes(){
+  const listEl = document.getElementById('routesList');
+  const unroutedEl = document.getElementById('unroutedBox');
+  if(!listEl || !unroutedEl) return;
+
+  if(routes.length===0){
+    listEl.innerHTML = `<div class="empty">No routes yet. Create one and start chaining shows so gear moves show-to-show instead of back to the warehouse each time.</div>`;
+  }else{
+    listEl.innerHTML = routes.map(route=>{
+      const legsHtml = route.showIds.map((showId, idx)=>{
+        const show = shows.find(s=>s.id===showId);
+        if(!show) return '';
+        const fromShow = idx===0 ? null : shows.find(s=>s.id===route.showIds[idx-1]);
+        const km = route.legDistances[legKey(route, idx)];
+        const t = km ? truckingTime(km) : null;
+        const timing = legTimingStatus(route, idx);
+        const statusCls = timing.level==='bad' ? 'bad' : timing.level==='tight' ? 'tight' : timing.level==='ok' ? 'ok' : '';
+        return `
+          <div class="leg">
+            <div class="leg-route">
+              <div class="leg-node">
+                <div class="leg-node-label">Leg ${idx+1} — from</div>
+                <div class="leg-node-name">${idx===0 ? 'Monterrey warehouse' : escapeHtml(fromShow ? fromShow.name : '?')}</div>
+                ${fromShow ? `<div class="leg-node-date">Leaves after load-out: ${fmtDate(fromShow.loadOut)}</div>` : ''}
+              </div>
+              <div class="leg-arrow">→</div>
+              <div class="leg-node">
+                <div class="leg-node-label">to</div>
+                <div class="leg-node-name">${escapeHtml(show.name)}</div>
+                <div class="leg-node-date">Needs to arrive by: ${fmtDate(show.loadIn)}</div>
+              </div>
+            </div>
+
+            <div class="leg-info-row">
+              ${km
+                ? `<div class="leg-dist">${km} km · ${fmtTrucking(t)} on the road</div>`
+                : `<div class="leg-dist unset">Distance not calculated yet</div>`
+              }
+              <button class="leg-calc-btn" onclick="calcLegDistance('${route.id}', ${idx})">${km ? 'Recalculate' : 'Calculate distance'}</button>
+            </div>
+
+            ${timing.text ? `<div class="leg-status-banner ${statusCls}" id="legstatus-${route.id}-${idx}">${escapeHtml(timing.text)}</div>` : ''}
+
+            <div class="leg-actions-row">
+              <button class="leg-calc-btn" ${idx===0?'disabled style="opacity:0.35;"':''} onclick="moveLeg('${route.id}', ${idx}, -1)" title="Move earlier">↑ Move up</button>
+              <button class="leg-calc-btn" ${idx===route.showIds.length-1?'disabled style="opacity:0.35;"':''} onclick="moveLeg('${route.id}', ${idx}, 1)" title="Move later">↓ Move down</button>
+              <button class="leg-remove-btn" onclick="removeShowFromRoute('${route.id}', ${idx})">Remove from route</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const totalKm = route.showIds.reduce((sum,_,idx)=> sum + (route.legDistances[legKey(route, idx)] || 0), 0);
+      const totalHours = route.showIds.reduce((sum,_,idx)=>{
+        const km = route.legDistances[legKey(route, idx)];
+        return sum + (km ? km/55 : 0);
+      }, 0);
+      const totalTrucking = totalHours ? fmtTrucking(truckingTime(totalKm)) : '—';
+
+      const alreadyInRoute = new Set(route.showIds);
+      const available = shows.filter(s=>!alreadyInRoute.has(s.id));
+
+      const isPublished = route.status === 'published';
+      const publishedSnapshot = publishedRoutes.find(r=>r.id===route.id);
+      const stale = isPublished && publishedSnapshot && (publishedSnapshot.totalKm !== totalKm || publishedSnapshot.showsCount !== route.showIds.length);
+
+      return `
+        <div class="route-card">
+          <div class="route-head">
+            <input class="route-name-input" value="${escapeHtml(route.name)}" onchange="renameRoute('${route.id}', this.value)">
+            <div class="route-head-actions">
+              <span class="route-totals">${route.showIds.length} shows · ${totalKm || 0} km · ${totalTrucking} on the road</span>
+              ${isPublished ? `<span class="route-badge published">Published${stale ? ' · edited since' : ''}</span>` : ''}
+              <button class="btn-solid" id="publishbtn-${route.id}" style="padding:9px 16px; font-size:13px;" onclick="publishRoute('${route.id}')">${isPublished ? (stale ? 'Update publish' : 'Republish') : 'Publish'}</button>
+              ${isPublished ? `<button class="leg-remove-btn" onclick="unpublishRoute('${route.id}')">unpublish</button>` : ''}
+              <button class="leg-remove-btn" onclick="deleteRoute('${route.id}')">delete route</button>
+            </div>
+          </div>
+          ${legsHtml || `<div class="empty" style="border:none;">No shows in this route yet.</div>`}
+          <div class="route-add-row">
+            <select id="addselect-${route.id}">
+              <option value="">+ Add show to this route…</option>
+              ${available.map(s=>`<option value="${s.id}">${escapeHtml(s.name)} — ${escapeHtml(s.city)}</option>`).join('')}
+            </select>
+            <button class="btn-solid" style="padding:8px 14px; font-size:12px;" onclick="const sel=document.getElementById('addselect-${route.id}'); addShowToRoute('${route.id}', sel.value); sel.value='';">Add</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderPublishedComparison();
+
+  const routed = routedShowIds();
+  const unrouted = shows.filter(s=>!routed.has(s.id));
+  if(unrouted.length===0){
+    unroutedEl.innerHTML = `<div class="panel-title" style="margin-bottom:0;">All shows are assigned to a route</div>`;
+  }else{
+    unroutedEl.innerHTML = `
+      <div class="panel-title">Not yet in a route</div>
+      ${unrouted.map(s=>`<span class="unrouted-chip">${escapeHtml(s.name)} — ${escapeHtml(s.city)}</span>`).join('')}
+    `;
+  }
+}
+
+function renderSummary(){
+  const upcoming = shows.filter(s=>{ const d = daysBetween(s.loadIn); return d===null || d>=0; });
+  const trucksCommitted = upcoming.reduce((sum,s)=>sum + metrics(s).trucks, 0);
+  const tightOnDrive = upcoming.filter(s=>{
+    const m = metrics(s);
+    return s.distance && m.trucking && m.daysToLoadIn!==null && (m.trucking.hours/24) > m.daysToLoadIn;
+  }).length;
+  const sortedUp = [...upcoming].sort((a,b)=>new Date(a.loadIn)-new Date(b.loadIn));
+  const next = sortedUp[0];
+  const overlapCount = findOverlapIds().size;
+
+  const stats = [
+    {label:'Upcoming shows', value: upcoming.length, unit:''},
+    {label:'Trucks committed', value: trucksCommitted, unit:'trucks'},
+    {label:'Tight on drive time', value: tightOnDrive, unit: tightOnDrive>0 ? '⚠' : ''},
+    {label:'Overlapping windows', value: overlapCount, unit: overlapCount>0 ? '⚠' : ''},
+    {label:'Next load-in', value: next ? fmtDate(next.loadIn) : '—', unit:''}
+  ];
+  document.getElementById('summary').innerHTML = stats.map(s=>`
+    <div class="stat">
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value">${s.value}<span class="stat-unit">${s.unit}</span></div>
+    </div>
+  `).join('');
+}
+
+function renderTimeline(){
+  const el = document.getElementById('timeline');
+  if(shows.length===0){
+    el.innerHTML = `<div class="empty">No shows on the board yet.<br>Add a load-in date to start tracking.</div>`;
+    return;
+  }
+  const sorted = [...shows].sort((a,b)=>new Date(a.loadIn)-new Date(b.loadIn));
+  el.innerHTML = sorted.map(s=>{
+    const m = metrics(s);
+    const isPast = m.daysToLoadIn !== null && m.daysToLoadIn < 0;
+    const isSel = s.id===selectedId;
+    return `
+      <div class="show-card ${isSel?'selected':''} ${isPast?'past':''}" onclick="selectShow('${s.id}')">
+        <div class="show-top">
+          <div class="show-dates-row">
+            <div class="show-date-block">
+              <div class="show-date-label">Load-in</div>
+              <div class="show-date-value primary">${fmtShort(s.loadIn)}${s.loadInTime ? ' · '+fmtTime(s.loadInTime) : ''}</div>
+            </div>
+            <div class="show-date-block">
+              <div class="show-date-label">Show</div>
+              <div class="show-date-value ${!s.showDate?'unset':''}">${s.showDate ? fmtShort(s.showDate) : '—'}</div>
+            </div>
+            <div class="show-date-block">
+              <div class="show-date-label">Load-out</div>
+              <div class="show-date-value ${!s.loadOut?'unset':''}">${s.loadOut ? fmtShort(s.loadOut) : '—'}</div>
+            </div>
+          </div>
+        </div>
+        <div class="show-days-out">${isPast ? 'past' : m.daysToLoadIn+'d out'}</div>
+        <div class="show-name">${escapeHtml(s.name)}</div>
+        <div class="show-venue">${escapeHtml(s.venue)}${s.venue&&s.city?', ':''}${escapeHtml(s.city)}</div>
+        <div class="show-tags">
+          ${s.distance ? `<span class="tag">${s.distance} km · ${fmtTrucking(truckingTime(s.distance))} drive</span>` : ''}
+          <span class="tag">${escapeHtml(s.roof)}</span>
+          <span class="tag">${truckIcon()}${escapeHtml(fmtTruckList(getTruckList(s)))}</span>
+          ${(s.smallTruck35 || s.piolin) ? `<span class="tag">${[s.smallTruck35 ? s.smallTruck35+'× 3.5T':'', s.piolin ? s.piolin+'× Piolin':''].filter(Boolean).join(' · ')}</span>` : ''}
+          ${s.wingSize ? `<span class="tag">wings ${s.wingSize}m</span>` : ''}
+          ${s.clearance ? `<span class="tag">clear ${s.clearance}m</span>` : ''}
+          ${s.workingArea ? `<span class="tag">${s.workingArea} m²</span>` : ''}
+          ${m.missingLoadOut ? '<span class="tag warn">missing load-out</span>' : ''}
+        </div>
+        <div class="card-actions">
+          <button class="card-action-btn" onclick="openEditModal('${s.id}'); event.stopPropagation();">Edit</button>
+          <button class="card-action-btn danger" onclick="deleteShow('${s.id}', event)">Remove</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectShow(id){ selectedId = id; render(); }
+
+function renderDetail(){
+  const el = document.getElementById('detail');
+  const show = shows.find(s=>s.id===selectedId);
+  if(!show){
+    el.innerHTML = `<div class="detail-empty">Select a show from the board to see its load-in → show → load-out timeline.</div>`;
+    return;
+  }
+  const m = metrics(show);
+
+  // build rail points: loadIn (0%), showDate (if present), loadOut (100%)
+  let showPct = 50;
+  if(show.showDate && show.loadOut){
+    const total = daysDiff(show.loadIn, show.loadOut) || 1;
+    const toShow = daysDiff(show.loadIn, show.showDate) || 0;
+    showPct = total > 0 ? Math.min(95, Math.max(5, (toShow/total)*100)) : 50;
+  }
+
+  el.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+      <div>
+        <div class="detail-name">${escapeHtml(show.name)}</div>
+        <div class="detail-venue">${escapeHtml(show.venue)}${show.venue&&show.city?', ':''}${escapeHtml(show.city)}</div>
+      </div>
+      <button class="btn-ghost" style="padding:6px 12px; font-size:12px; white-space:nowrap;" onclick="openEditModal('${show.id}')">Edit</button>
+    </div>
+
+    <div class="rail">
+      <div class="rail-track">
+        <div class="rail-point" style="left:0%">
+          <div class="rail-label align-start" style="left:0">${fmtShort(show.loadIn)}${show.loadInTime ? ' '+fmtTime(show.loadInTime) : ''}</div>
+          <div class="rail-sub align-start" style="left:0">load-in</div>
+        </div>
+        ${show.showDate ? `
+        <div class="rail-point muted" style="left:${showPct}%">
+          <div class="rail-label align-center" style="left:${showPct}%">${fmtShort(show.showDate)}</div>
+          <div class="rail-sub align-center" style="left:${showPct}%">show</div>
+        </div>` : ''}
+        <div class="rail-point" style="left:${show.loadOut ? 100 : (show.showDate?95:50)}%">
+          <div class="rail-label align-end" style="left:${show.loadOut ? 100 : (show.showDate?95:50)}%">${show.loadOut ? fmtShort(show.loadOut) : '?'}</div>
+          <div class="rail-sub align-end" style="left:${show.loadOut ? 100 : (show.showDate?95:50)}%">load-out</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric">
+        <div class="metric-label">Days to load-in</div>
+        <div class="metric-value ${m.daysToLoadIn!==null && m.daysToLoadIn<0 ? '' : ''}">${m.daysToLoadIn===null ? '—' : (m.daysToLoadIn<0 ? 'past' : m.daysToLoadIn+'d')}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Trucks required</div>
+        <div class="metric-value" style="font-size:15px; display:flex; align-items:center;">${truckIcon()}${escapeHtml(fmtTruckList(getTruckList(show)))}</div>
+      </div>
+      ${(show.smallTruck35 || show.piolin) ? `
+      <div class="metric">
+        <div class="metric-label">Small units</div>
+        <div class="metric-value" style="font-size:14px;">${[
+          show.smallTruck35 ? `${show.smallTruck35}× 3.5 Ton` : '',
+          show.piolin ? `${show.piolin}× Piolin` : ''
+        ].filter(Boolean).join(' · ')}</div>
+      </div>` : ''}
+      <div class="metric">
+        <div class="metric-label">Distance from ${escapeHtml(show.warehouse)}</div>
+        <div class="metric-value ${!show.distance?'dim':''}">${show.distance ? show.distance+' km' : `<a href="javascript:void(0)" onclick="quickCalcDistance('${show.id}')" style="color:var(--amber); font-size:13px; text-decoration:underline;">calculate</a>`}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Trucking time <span style="color:var(--steel);">@ 55 km/h</span></div>
+        <div class="metric-value ${!show.distance?'dim':''}">${fmtTrucking(m.trucking) || 'no distance'}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Build (load-in → show)</div>
+        <div class="metric-value ${m.buildDays===null?'dim':''}">${m.buildDays===null ? 'no show date' : m.buildDays+'d'}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">On site (load-in → load-out)</div>
+        <div class="metric-value ${m.onSiteDays===null?'alert':''}">${m.onSiteDays===null ? 'missing load-out' : m.onSiteDays+'d'}</div>
+      </div>
+    </div>
+
+    ${show.distance && m.trucking && m.daysToLoadIn!==null && m.daysToLoadIn>=0 && (m.trucking.hours/24) > m.daysToLoadIn ? `
+    <div class="notes-block" style="color:var(--danger); border:1px solid var(--danger); padding:8px 10px; margin-bottom:12px;">
+      ⚠ Non-stop drive time (${fmtTrucking(m.trucking)}) is longer than the time left until load-in.
+    </div>` : ''}
+
+    ${show.notes ? `<div class="notes-block">${escapeHtml(show.notes)}</div>` : ''}
+
+    <div class="spec-footer">
+      Load-in call: ${fmtDate(show.loadIn)}${show.loadInTime ? ' at '+fmtTime(show.loadInTime) : ' (time not set)'}<br>
+      Roof: ${escapeHtml(show.roof)}${show.wingSize ? ' · wings '+show.wingSize+'m/side' : ''}${show.clearance ? ' · clearance '+show.clearance+'m' : ''}${show.workingArea ? ' · working area '+show.workingArea+' m²' : ''}<br>
+      Warehouse: ${escapeHtml(show.warehouse)}${show.distance ? ' · '+show.distance+' km' : ''}
+    </div>
+  `;
+}
+
+function escapeHtml(str){
+  if(!str) return '';
+  return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function truckIcon(){
+  return `<svg class="truck-icon" viewBox="0 0 32 16" width="16" height="8" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="3" width="6" height="8" rx="1.2" fill="currentColor"/>
+    <rect x="7" y="7" width="22" height="2.4" rx="0.6" fill="currentColor"/>
+    <circle cx="5" cy="13" r="2" fill="currentColor"/>
+    <circle cx="15" cy="13" r="2" fill="currentColor"/>
+    <circle cx="25" cy="13" r="2" fill="currentColor"/>
+  </svg>`;
+}
+
+loadShows();
+</script>
+</body>
+</html>
